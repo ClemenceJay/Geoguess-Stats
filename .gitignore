@@ -1,0 +1,9 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Notes Perso
+backend/API_NOTES.md
+frontend/DESIGN.md
+LISTE_FEATURE_V1.md
+PROJECT_CONTEXT.md
