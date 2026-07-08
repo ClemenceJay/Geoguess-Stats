@@ -14,11 +14,13 @@ router.get('/month', requireAuth, async (req, res) => {
         const { year, month } = req.query; 
         // Recupère les daily joués dans le mois
         const daysPlayed = await getMonthHistory(ncfa, year, month);
+        // On supprime les jours sans score (envoyés par geoguessr pour la prtection de la streak)
+        const reallyDaysPlayed = daysPlayed.filter(day => day.totalScore !== null);
 
         const userId = req.session.user.id;
 
         const results = await Promise.all(
-            daysPlayed.map(async (day) => {
+            reallyDaysPlayed.map(async (day) => {
                 // Pour chaque jour on met la date au bon format
                 const dateStr = buildDateStr(year, month, day.day);
                 // On récupère les résultat world et pays en parallèle
