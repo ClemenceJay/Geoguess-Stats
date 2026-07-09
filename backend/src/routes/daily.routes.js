@@ -13,7 +13,9 @@ router.get('/month', requireAuth, async (req, res) => {
         const { ncfa } = req.session;
         const { year, month } = req.query; 
         // Recupère les daily joués dans le mois
-        const daysPlayed = await getMonthHistory(ncfa, year, month);
+        const rawdata = await getMonthHistory(ncfa, year, month);
+        // On gère si ça ne renvoie rien car pas d'info on renvoie un tableau vide
+        const daysPlayed = Array.isArray(rawdata) ? rawdata : [];
         // On supprime les jours sans score (envoyés par geoguessr pour la prtection de la streak)
         const reallyDaysPlayed = daysPlayed.filter(day => day.totalScore !== null);
 

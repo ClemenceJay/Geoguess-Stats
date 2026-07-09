@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { computeStats } from "../utils/statsUtils";
+import StatsTabs from "../components/StatsTabs";
 
 export default function DashboardPage() {
     const currentDate = new Date();
@@ -9,6 +9,7 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    // On récupère les infos du mois
     async function fetchMonth() {
         setLoading(true);
         setError(null);
@@ -26,9 +27,6 @@ export default function DashboardPage() {
         }
     }
 
-    // On récupère les stats globales avec les datas récupérés pour le mois choisi
-    const stats = computeStats(data);
-
     return (
         <div>
             <h1>Geoguess-Stat</h1>
@@ -45,8 +43,8 @@ export default function DashboardPage() {
                 </select>
                 <select value={year} onChange={(e) => setYear(Number(e.target.value))}>
                     {Array.from( 
-                        {length: currentDate.getFullYear() - 2015 + 1},
-                        (_, i) => 2015 + i
+                        {length: currentDate.getFullYear() - 2020 + 1},
+                        (_, i) => 2020 + i
                     ).map((y) => (
                         <option key={y} value={y}>{y}</option>
                     ))}
@@ -84,19 +82,7 @@ export default function DashboardPage() {
                 </table>
             )}
 
-            {stats && (
-                <div>
-                    <br />
-                    <br />
-                    <br />
-                    <h2>Stats du mois ({stats.count} daily joués)</h2>
-                    <ul>
-                        <li>Score moyen : {stats.avgScore}</li>
-                        <li>Rang monde moyen : {stats.avgWorldRank} (top {stats.avgWorldPercent}%)</li>
-                        <li>Rang pays moyen : {stats.avgCountryRank} (top {stats.avgCountryPercent}%)</li>
-                    </ul>
-                </div>
-            )}
+            < StatsTabs  data={data} year={year} />
         </div>
     );
 
