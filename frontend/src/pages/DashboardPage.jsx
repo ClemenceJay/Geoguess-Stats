@@ -1,25 +1,43 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import StatsTabs from "../components/StatsTabs";
 
 export default function DashboardPage() {
     const currentDate = new Date();
     const [year, setYear] = useState(currentDate.getFullYear());
     const [month, setMonth] = useState(currentDate.getMonth() + 1); // +1 parce que les mois sont indexés à partir de 0
-    const [data, setData] = useState(null);
+    const [allTimeData, setAllTimeData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const monthKey = `${year}-${String(month).padStart(2, '0')}-`;
+    const monthData = allTimeData?.filter(day => day.date.startsWith(monthKey)) ?? null;
+    const yearData = allTimeData?.filter(day => day.date.startsWith(`${year}-`)) ?? null;
+    const hasFetched = useRef(false);
 
-    // On récupère les infos du mois
-    async function fetchMonth() {
+    useEffect(() => {
+        if (!hasFetched.current) {
+            hasFetched.current = true;
+            fetchAllTime();
+        }
+    }, []);
+
+    // On récupère les infos des daily depuis le début
+    async function fetchAllTime() {
         setLoading(true);
-        setError(null);
-        try {
-            const res = await fetch(`/api/daily/month?year=${year}&month=${month}`, {
-                credentials: 'include', //pour que le cookie de session soit envoyé
-            });
-            if (!res.ok) throw new Error('Erreur lors du chargement');
-            const json = await res.json();
-            setData(json);
+        try{
+            const allDays =  [];
+
+            for (let y = 2020; y <= currentDate.getFullYear(); y++) {
+                const maxMonth = y === currentDate.getFullYear() ? currentDate.getMonth() + 1 : 12;
+                for (let m = 1; m <= maxMonth; m++) {
+                    const res = await fetch(`/api/daily/month?year=${y}&month=${m}`, {
+                        credentials: 'include'
+                    });
+                    const json = await res.json();
+                    if (Array.isArray(json)) allDays.push(...json); //on ajoute le resultat de chaque mois dans l'array globale si la réponse est une array
+                    await new Promise(resolve => setTimeout(resolve, 150)); // On attend un petit temps avant le prochain fetch pour éviter le rate limiting de l'API
+                }
+            }
+            setAllTimeData(allDays);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -49,13 +67,12 @@ export default function DashboardPage() {
                         <option key={y} value={y}>{y}</option>
                     ))}
                 </select>
-                <button onClick={fetchMonth}>Charger</button>
             </div>
 
             {loading && <p>Chargement...</p>}
             {error && <p>{error}</p>}
 
-            {data && (
+            {monthData && monthData.length > 0 && (
                 <table>
                     <thead>
                         <tr>
@@ -68,7 +85,7 @@ export default function DashboardPage() {
                         </tr>
                     </thead>
                     <tbody>
-                        {data.map((day) => (
+                        {monthData.map((day) => (
                             <tr key={day.date}>
                                 <td>{day.date}</td>
                                 <td>{day.score}</td>
@@ -82,7 +99,7 @@ export default function DashboardPage() {
                 </table>
             )}
 
-            < StatsTabs  data={data} year={year} />
+            < StatsTabs  allTimeData={allTimeData} yearData={yearData} monthData={monthData}/>
         </div>
     );
 
