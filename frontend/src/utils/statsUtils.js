@@ -8,8 +8,8 @@ export function computeStats(days) {
         count: days.length,
         avgScore: Math.round(avg(days.map(d => d.score))),
         avgWorldRank: Math.round(avg(days.map(d => d.world.rank))),
-        avgWorldPercent: avg(days.map(d => parseFloat(d.world.percent))).toFixed(1),
+        avgWorldPercent: avg(days.map(d => parseFloat(d.world.percent))).toFixed(1), //retourne une string
         avgCountryRank: Math.round(avg(days.map(d => d.country.rank))),
-        avgCountryPercent: avg(days.map(d => parseFloat(d.country.percent))).toFixed(1),
+        avgCountryPercent: avg(days.map(d => parseFloat(d.country.percent))).toFixed(1),//retourne une string
     };
 }
