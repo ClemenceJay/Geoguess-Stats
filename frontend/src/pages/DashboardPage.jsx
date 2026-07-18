@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import StatsTabs from "../components/StatsTabs";
+import DailyCharts from "../components/DailyCharts";
 
 export default function DashboardPage() {
     const currentDate = new Date();
@@ -100,6 +101,8 @@ export default function DashboardPage() {
             )}
 
             < StatsTabs  allTimeData={allTimeData} yearData={yearData} monthData={monthData}/>
+            <DailyCharts data={monthData} />
+
         </div>
     );
 
